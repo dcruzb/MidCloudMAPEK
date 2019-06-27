@@ -5,10 +5,13 @@ import (
 	"github.com/dcbCIn/MidCloud/lib"
 )
 
-func Execute(lookupProxy dist.LookupProxy, cloudFunctionName string, chanExecutor chan CloudService) {
+func Execute(ip string, port int, cloudFunctionName string, chanExecutor chan CloudService) {
 	for {
 		cloudService := <-chanExecutor
-		err := lookupProxy.Bind(cloudFunctionName, cloudService.Aor.ClientProxy)
-		lib.FailOnError(err, "Error at lookup.")
+
+		lp := *dist.NewLookupProxy(ip, port)
+		err := lp.Bind(cloudFunctionName, cloudService.Aor.ClientProxy)
+		lib.FailOnError(err, "Error at lookup.bind.")
+		lp.Close()
 	}
 }
