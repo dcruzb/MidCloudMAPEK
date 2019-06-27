@@ -23,22 +23,31 @@ type Monitor struct {
 // cloudFunctionsPattern stands for de pattern of the services that will be monitored. Any service that contains this pattern in the Lookup Proxy will be monitored
 //
 //	go monitor(lp, "cloudFunctions", "CloudFunctions")
-func (mon Monitor) Start(lookupProxy dist.LookupProxy, cloudFunctionsPattern string, chanAnalyzer chan []CloudService) {
-	mon.lookup = lookupProxy
+func (mon Monitor) Start(ip string, port int, cloudFunctionsPattern string, chanAnalyzer chan []CloudService) {
+
 	//mon.cloudFunctionName = cloudFunctionName
 	mon.cloudFunctionsPattern = cloudFunctionsPattern
 
 	for {
+		mon.lookup = *dist.NewLookupProxy(ip, port)
+
 		mon.refreshCloudServices()
 
-		for _, service := range mon.cloudServices {
-			service.RefreshPrice()
-			service.RefreshStatus()
+		err := mon.lookup.Close()
+		if err != nil {
+			lib.PrintlnError("Error at closing lookup. Error:", err)
 		}
 
-		chanAnalyzer <- mon.cloudServices
+		for i := range mon.cloudServices {
+			mon.cloudServices[i].RefreshPrice()
+			mon.cloudServices[i].RefreshStatus()
+		}
 
-		time.Sleep(30 * time.Second)
+		if len(mon.cloudServices) > 0 {
+			chanAnalyzer <- mon.cloudServices
+		}
+
+		time.Sleep(5 * time.Second)
 	}
 }
 
