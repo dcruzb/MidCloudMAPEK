@@ -11,8 +11,8 @@ type Monitor struct {
 	cloudServices []CloudService
 	//nameServerIp          string
 	//nameServerPort        int
-	lookup                dist.LookupProxy
-	cloudFunctionName     string
+	lookup dist.LookupProxy
+	//	cloudFunctionName     string
 	cloudFunctionsPattern string
 }
 
@@ -23,9 +23,9 @@ type Monitor struct {
 // cloudFunctionsPattern stands for de pattern of the services that will be monitored. Any service that contains this pattern in the Lookup Proxy will be monitored
 //
 //	go monitor(lp, "cloudFunctions", "CloudFunctions")
-func (mon Monitor) Start(lookupProxy dist.LookupProxy, cloudFunctionName string, cloudFunctionsPattern string, chanAnalyzer chan []CloudService) {
+func (mon Monitor) Start(lookupProxy dist.LookupProxy, cloudFunctionsPattern string, chanAnalyzer chan []CloudService) {
 	mon.lookup = lookupProxy
-	mon.cloudFunctionName = cloudFunctionName
+	//mon.cloudFunctionName = cloudFunctionName
 	mon.cloudFunctionsPattern = cloudFunctionsPattern
 
 	for {
@@ -43,7 +43,7 @@ func (mon Monitor) Start(lookupProxy dist.LookupProxy, cloudFunctionName string,
 }
 
 // Get the list of cloud services based on name server list of binded servers
-func (mon Monitor) refreshCloudServices() {
+func (mon *Monitor) refreshCloudServices() {
 	//lp := dist.NewLookupProxy(mon.nameServerIp, mon.nameServerPort)
 	services, err := mon.lookup.List()
 	if err != nil {
@@ -56,6 +56,10 @@ func (mon Monitor) refreshCloudServices() {
 	//	lib.PrintlnError("Error at closing lookup. Error:", err)
 	//}
 
+	for _, cloudService := range mon.cloudServices {
+		cloudService.Removed = true
+	}
+
 	for _, service := range services {
 		// If the service registred in NameServer is a CloudFunctions server
 		if strings.Contains(service.ServiceName, mon.cloudFunctionsPattern) {
@@ -63,11 +67,13 @@ func (mon Monitor) refreshCloudServices() {
 			for _, cloudService := range mon.cloudServices {
 				if cloudService.Aor.ServiceName == service.ServiceName {
 					found = true
+					cloudService.Removed = false
 				}
 			}
 			if !found {
 				newCloudService := CloudService{}
 				newCloudService.Aor = service
+				newCloudService.Removed = false
 				mon.cloudServices = append(mon.cloudServices, newCloudService)
 			}
 		}
