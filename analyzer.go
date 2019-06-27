@@ -16,9 +16,11 @@ func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
 
 		fmt.Println("Analyzer f:", services)
 
-		chanPlanner <- services[0]
+		if len(services) > 0 {
+			chanPlanner <- services[0]
+		}
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Second)
 	}
 }
 
