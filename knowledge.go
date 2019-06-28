@@ -17,7 +17,7 @@ type CloudService struct {
 func (cs *CloudService) RefreshPrice() {
 	// Todo implement call to each of the cloud services using a generic proxy to get current price
 	cfp := *NewCloudFunctionsProxy(cs.Aor.ClientProxy.Ip, cs.Aor.ClientProxy.Port, cs.Aor.ClientProxy.ObjectId)
-	price, err := cfp.Price(1024)
+	price, err := cfp.Price(100)
 	if err != nil {
 		lib.PrintlnError("Error while getting price from", cs.Aor.ServiceName, ". Error:", err)
 	}
