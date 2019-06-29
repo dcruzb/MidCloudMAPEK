@@ -2,6 +2,7 @@ package MidCloudMAPEK
 
 import (
 	"fmt"
+	"github.com/dcbCIn/MidCloud/lib"
 	"sort"
 	"time"
 )
@@ -13,7 +14,7 @@ func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
 
 		sort.Sort(SortByPriceAndAvailability(services))
 
-		fmt.Println("Analyzer:", before, "=>", services)
+		lib.PrintlnDebug("Analyzer:", before, "=>", services)
 
 		// TODO if the best one is already chosen, then dont send again
 		if len(services) > 0 {
