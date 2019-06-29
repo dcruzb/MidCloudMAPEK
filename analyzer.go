@@ -9,13 +9,13 @@ import (
 func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
 	for {
 		services := <-chanAnalyzer
-
-		fmt.Println("Analyzer a:", services)
+		before := fmt.Sprintf("%v", services)
 
 		sort.Sort(SortByPriceAndAvailability(services))
 
-		fmt.Println("Analyzer f:", services)
+		fmt.Println("Analyzer:", before, "=>", services)
 
+		// TODO if the best one is already chosen, then dont send again
 		if len(services) > 0 {
 			chanPlanner <- services[0]
 		}
