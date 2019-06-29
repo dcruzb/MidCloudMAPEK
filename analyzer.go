@@ -8,6 +8,7 @@ import (
 )
 
 func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
+	var first CloudService
 	for {
 		services := <-chanAnalyzer
 		before := fmt.Sprintf("%v", services)
@@ -18,7 +19,10 @@ func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
 
 		// TODO if the best one is already chosen, then dont send again
 		if len(services) > 0 {
-			chanPlanner <- services[0]
+			if first != services[0] {
+				first = services[0]
+				chanPlanner <- first
+			}
 		}
 
 		time.Sleep(5 * time.Second)
