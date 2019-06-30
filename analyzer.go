@@ -11,20 +11,21 @@ func Analyze(chanAnalyzer chan []CloudService, chanPlanner chan CloudService) {
 	var first CloudService
 	for {
 		services := <-chanAnalyzer
-		before := fmt.Sprintf("%v", services)
 
-		sort.Sort(SortByPriceAndAvailability(services))
-
-		lib.PrintlnDebug("Analyzer:", before, "=>", services)
-
-		// TODO if the best one is already chosen, then dont send again
 		if len(services) > 0 {
+			before := fmt.Sprintf("%v", services)
+
+			sort.Sort(SortByPriceAndAvailability(services))
+
+			lib.PrintlnInfo("Analyzer:", before, "=>", services)
+
 			if first != services[0] {
 				first = services[0]
 				chanPlanner <- first
 			}
 		}
 
+		// Todo put sleep time of the monitor in the config file
 		time.Sleep(5 * time.Second)
 	}
 }
